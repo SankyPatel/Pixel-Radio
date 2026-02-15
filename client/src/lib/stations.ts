@@ -28,7 +28,7 @@ export const STATIONS: Station[] = [
     id: 'mirchi-dubai',
     name: 'Radio Mirchi Dubai',
     genre: 'Bollywood Hits',
-    url: 'http://peridot.streamguys.com:7150/Mirchi',
+    url: 'https://25283.live.streamtheworld.com/DUB_HIN_GSTAAC/HLS/6f5d5d6b-660e-4365-9826-5b04bdfd01d8/0/playlist.m3u8',
     image: '/assets/stations/mirchi_dubai.png',
     color: 'bg-sky-600'
   },
