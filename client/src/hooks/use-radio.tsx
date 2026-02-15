@@ -64,15 +64,16 @@ export function useRadio() {
         
         // Update Media Session Metadata
         if ('mediaSession' in navigator) {
+          const artSrc = window.location.origin + currentStation.artworkLg;
+          const artType = currentStation.artworkLg.endsWith('.jpg') ? 'image/jpeg' : 'image/png';
           navigator.mediaSession.metadata = new MediaMetadata({
             title: currentStation.name,
             artist: currentStation.genre,
+            album: 'Pixel Radio',
             artwork: [
-              { 
-                src: window.location.origin + currentStation.image, 
-                sizes: '512x512', 
-                type: currentStation.image.endsWith('.webp') ? 'image/webp' : 'image/png' 
-              }
+              { src: artSrc, sizes: '180x180', type: artType },
+              { src: artSrc, sizes: '256x256', type: artType },
+              { src: artSrc, sizes: '512x512', type: artType }
             ]
           });
         }
