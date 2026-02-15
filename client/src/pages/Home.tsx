@@ -170,24 +170,24 @@ export default function Home() {
               }}
             >
               
-              {/* Spinning Album Art */}
+              {/* Station Cover Art */}
               <div className="relative shrink-0">
-                <motion.div 
-                  animate={{ rotate: isPlaying ? 360 : 0 }}
-                  transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+                <div 
                   className={cn(
-                    "w-16 h-16 rounded-full overflow-hidden border-2 shadow-lg transition-colors duration-700",
+                    "w-14 h-14 rounded-lg overflow-hidden border-2 shadow-lg transition-colors duration-700",
                     currentStation.color.replace('bg-', 'border-')
                   )}
                 >
                   <img src={currentStation.image} alt="Playing" className="w-full h-full object-cover" />
-                </motion.div>
-                <div className={cn(
-                  "absolute -bottom-1 -right-1 rounded-full p-1 border-2 border-background transition-colors duration-700",
-                  currentStation.color
-                )}>
-                  <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
                 </div>
+                {isPlaying && (
+                  <div className={cn(
+                    "absolute -bottom-1 -right-1 rounded-full p-1 border-2 border-background transition-colors duration-700",
+                    currentStation.color
+                  )}>
+                    <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
+                  </div>
+                )}
               </div>
 
               {/* Info */}
