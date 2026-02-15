@@ -68,7 +68,11 @@ export function useRadio() {
             title: currentStation.name,
             artist: currentStation.genre,
             artwork: [
-              { src: window.location.origin + currentStation.image, sizes: '512x512', type: 'image/png' }
+              { 
+                src: window.location.origin + currentStation.image, 
+                sizes: '512x512', 
+                type: currentStation.image.endsWith('.webp') ? 'image/webp' : 'image/png' 
+              }
             ]
           });
         }

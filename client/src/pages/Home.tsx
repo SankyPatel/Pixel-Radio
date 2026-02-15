@@ -36,7 +36,7 @@ export default function Home() {
           <p className="text-muted-foreground">Curated Indian radio channels for you</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {STATIONS.map((station) => (
             <motion.div
               key={station.id}
@@ -48,13 +48,13 @@ export default function Home() {
             >
               <Card 
                 className={cn(
-                  "overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full group",
+                  "overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full group rounded-2xl",
                   currentStation?.id === station.id ? "ring-2 ring-primary bg-primary/5" : "bg-card"
                 )}
                 onClick={() => playStation(station)}
               >
-                <CardContent className="p-0">
-                  <div className="relative aspect-square sm:aspect-video overflow-hidden bg-muted">
+                <CardContent className="p-0 flex flex-col items-center">
+                  <div className="relative w-full aspect-square max-w-[120px] mt-4 overflow-hidden rounded-xl bg-muted">
                     <img 
                       src={station.image} 
                       alt={station.name}
@@ -66,30 +66,28 @@ export default function Home() {
                       "absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300",
                       currentStation?.id === station.id && isPlaying ? "opacity-100 bg-black/40" : ""
                     )}>
-                      <div className="w-16 h-16 rounded-full bg-primary/90 text-primary-foreground flex items-center justify-center shadow-lg backdrop-blur-sm">
+                      <div className="w-10 h-10 rounded-full bg-primary/90 text-primary-foreground flex items-center justify-center shadow-lg backdrop-blur-sm">
                         {currentStation?.id === station.id && isPlaying ? (
-                          <Pause className="w-8 h-8 fill-current" />
+                          <Pause className="w-5 h-5 fill-current" />
                         ) : (
-                          <Play className="w-8 h-8 fill-current pl-1" />
+                          <Play className="w-5 h-5 fill-current pl-0.5" />
                         )}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="p-5">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-bold text-lg leading-tight mb-1">{station.name}</h3>
-                        <p className="text-sm text-muted-foreground font-medium">{station.genre}</p>
-                      </div>
-                      
-                      {currentStation?.id === station.id && (
-                        <div className="flex gap-0.5 items-end h-4 mb-1">
+                  <div className="p-3 text-center w-full">
+                    <h3 className="font-bold text-sm leading-tight truncate px-1">{station.name}</h3>
+                    <p className="text-[10px] text-muted-foreground font-medium truncate uppercase tracking-wider">{station.genre}</p>
+                    
+                    <div className="mt-2 flex justify-center h-2">
+                      {currentStation?.id === station.id && isPlaying && (
+                        <div className="flex gap-0.5 items-end">
                           {[1, 2, 3].map((i) => (
                             <motion.div
                               key={i}
-                              className="w-1 bg-primary rounded-full"
-                              animate={{ height: [4, 16, 4] }}
+                              className="w-0.5 bg-primary rounded-full"
+                              animate={{ height: [2, 8, 2] }}
                               transition={{ 
                                 repeat: Infinity, 
                                 duration: 0.8, 
