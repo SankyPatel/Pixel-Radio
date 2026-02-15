@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { STATIONS, Station } from "@/lib/stations";
 import { useRadio } from "@/hooks/use-radio";
 import { useCast } from "@/hooks/use-cast";
-import { Play, Pause, Cast, Volume2, Radio, CastIcon } from "lucide-react";
+import { Play, Pause, Cast, Volume2, Radio, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { cn } from "@/lib/utils";
 export default function Home() {
   const { currentStation, isPlaying, playStation, togglePlay, volume, setVolume } = useRadio();
   const { isCastAvailable, isCasting, castDeviceName, requestCast, castStation, stopCast } = useCast();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleCastClick = () => {
     if (isCasting) {
@@ -24,6 +26,11 @@ export default function Home() {
     if (isCasting) {
       castStation(station);
     }
+    setIsExpanded(true);
+  };
+
+  const closeExpanded = () => {
+    setIsExpanded(false);
   };
 
   return (
@@ -104,7 +111,6 @@ export default function Home() {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     
-                    {/* Overlay Play Button */}
                     <div className={cn(
                       "absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300",
                       currentStation?.id === station.id && isPlaying ? "opacity-100 bg-black/40" : ""
@@ -150,9 +156,177 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Persistent Player Bar (Material You Style) */}
+      {/* Expanded Full-Screen Player */}
       <AnimatePresence>
-        {currentStation && (
+        {currentStation && isExpanded && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            className="fixed inset-0 z-[60] flex flex-col"
+            data-testid="player-expanded"
+          >
+            <div
+              className="absolute inset-0 transition-colors duration-700"
+              style={{
+                background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.97) 100%)`
+              }}
+            />
+
+            <div className="relative flex flex-col h-full">
+              {/* Top bar with close */}
+              <div className="flex items-center justify-between p-4 pt-6">
+                <button
+                  onClick={closeExpanded}
+                  className="p-2 rounded-full hover:bg-muted/80 transition-colors text-muted-foreground"
+                  data-testid="button-close-expanded"
+                >
+                  <ChevronDown className="w-6 h-6" />
+                </button>
+                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Now Playing</span>
+                <button
+                  onClick={closeExpanded}
+                  className="p-2 rounded-full hover:bg-muted/80 transition-colors text-muted-foreground"
+                  data-testid="button-x-expanded"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Cover Art + Info */}
+              <div className="flex-1 flex flex-col items-center justify-center px-8 gap-8">
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.1, type: "spring", damping: 20 }}
+                  className="relative"
+                >
+                  <div
+                    className={cn(
+                      "w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] rounded-2xl overflow-hidden shadow-2xl border-4 transition-colors duration-700",
+                      currentStation.color.replace('bg-', 'border-')
+                    )}
+                  >
+                    <img
+                      src={currentStation.artworkLg}
+                      alt={currentStation.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {isPlaying && (
+                    <div className={cn(
+                      "absolute -bottom-2 -right-2 rounded-full p-1.5 border-2 border-background transition-colors duration-700",
+                      currentStation.color
+                    )}>
+                      <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                    </div>
+                  )}
+                </motion.div>
+
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-center space-y-2 w-full max-w-xs"
+                >
+                  <h2 className="text-2xl font-bold tracking-tight" data-testid="text-expanded-name">
+                    {currentStation.name}
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    {currentStation.genre}
+                  </p>
+                  {isCasting && castDeviceName && (
+                    <div className="flex items-center justify-center gap-1.5 text-primary text-xs font-medium">
+                      <Cast className="w-3.5 h-3.5" />
+                      <span>Casting to {castDeviceName}</span>
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* Equalizer bars */}
+                {isPlaying && (
+                  <div className="flex gap-1 items-end h-6">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <motion.div
+                        key={i}
+                        className={cn("w-1 rounded-full", currentStation.color)}
+                        animate={{ height: [4, 20, 6, 16, 4] }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 1.2,
+                          ease: "easeInOut",
+                          delay: i * 0.12,
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Controls at bottom */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="p-8 pb-12 space-y-6"
+              >
+                {/* Volume */}
+                <div className="flex items-center gap-3 max-w-xs mx-auto w-full">
+                  <Volume2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <Slider
+                    value={[volume * 100]}
+                    max={100}
+                    step={1}
+                    onValueChange={(val) => setVolume(val[0] / 100)}
+                    className="cursor-pointer flex-1"
+                  />
+                </div>
+
+                {/* Play / Cast buttons */}
+                <div className="flex items-center justify-center gap-6">
+                  {isCastAvailable && (
+                    <button
+                      onClick={handleCastClick}
+                      className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
+                        isCasting ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}
+                      data-testid="button-cast-expanded"
+                    >
+                      <Cast className="w-5 h-5" />
+                    </button>
+                  )}
+
+                  <button
+                    onClick={togglePlay}
+                    className={cn(
+                      "w-18 h-18 rounded-full text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl",
+                      currentStation.color
+                    )}
+                    style={{ width: 72, height: 72 }}
+                    data-testid="button-play-expanded"
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-9 h-9 fill-current" />
+                    ) : (
+                      <Play className="w-9 h-9 fill-current pl-1" />
+                    )}
+                  </button>
+
+                  {isCastAvailable && (
+                    <div className="w-12 h-12" />
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mini Player Bar */}
+      <AnimatePresence>
+        {currentStation && !isExpanded && (
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -162,16 +336,19 @@ export default function Home() {
             <div 
               className={cn(
                 "w-full max-w-2xl rounded-[2rem] shadow-2xl border border-border/20 p-4 pointer-events-auto backdrop-blur-3xl transition-colors duration-700 flex items-center gap-4 pr-6",
-                currentStation.color.replace('bg-', 'bg-').replace('-600', '-500/20').replace('-500', '-400/20').replace('-700', '-600/20'),
                 "bg-white/80 dark:bg-zinc-900/80"
               )}
               style={{
-                background: `linear-gradient(135deg, hsl(var(--background) / 0.8), hsl(var(--background) / 0.9)), var(--tw-gradient-to)`
+                background: `linear-gradient(135deg, hsl(var(--background) / 0.8), hsl(var(--background) / 0.9))`
               }}
             >
               
-              {/* Station Cover Art */}
-              <div className="relative shrink-0">
+              {/* Station Cover Art — tap to expand */}
+              <div
+                className="relative shrink-0 cursor-pointer"
+                onClick={() => setIsExpanded(true)}
+                data-testid="button-expand-player"
+              >
                 <div 
                   className={cn(
                     "w-14 h-14 rounded-lg overflow-hidden border-2 shadow-lg transition-colors duration-700",
@@ -190,8 +367,11 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
+              {/* Info — tap to expand */}
+              <div
+                className="flex-1 min-w-0 cursor-pointer"
+                onClick={() => setIsExpanded(true)}
+              >
                 <h4 className="font-bold truncate text-base" data-testid="text-now-playing">{currentStation.name}</h4>
                 <p className="text-sm text-muted-foreground truncate">
                   {currentStation.genre} • {isCasting ? `Casting to ${castDeviceName}` : 'Live'}
@@ -200,7 +380,6 @@ export default function Home() {
 
               {/* Controls */}
               <div className="flex items-center gap-3">
-                {/* Volume Slider (Hidden on small screens) */}
                 <div className="hidden sm:flex items-center gap-2 w-24 mr-2">
                   <Volume2 className="w-4 h-4 text-muted-foreground" />
                   <Slider 
@@ -212,7 +391,6 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Cast Button in Player */}
                 {isCastAvailable && (
                   <button
                     onClick={handleCastClick}
