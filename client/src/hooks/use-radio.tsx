@@ -39,20 +39,26 @@ export function useRadio() {
             title: currentStation.name,
             artist: currentStation.genre,
             artwork: [
-              { src: currentStation.image, sizes: '512x512', type: 'image/png' }
+              { src: window.location.origin + currentStation.image, sizes: '512x512', type: 'image/png' }
             ]
           });
         }
       }
 
-      if (isPlaying) {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error("Playback failed:", error);
-            setIsPlaying(false);
-          });
+      const playAudio = async () => {
+        try {
+          // Reset before playing to handle potential stalls
+          if (audio.paused || audio.ended) {
+            await audio.play();
+          }
+        } catch (error) {
+          console.error("Playback failed:", error);
+          setIsPlaying(false);
         }
+      };
+
+      if (isPlaying) {
+        playAudio();
       } else {
         audio.pause();
       }
