@@ -168,9 +168,9 @@ export default function Home() {
             data-testid="player-expanded"
           >
             <div
-              className="absolute inset-0 transition-colors duration-700"
+              className="absolute inset-0 backdrop-blur-2xl transition-colors duration-700"
               style={{
-                background: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.97) 100%)`
+                background: `linear-gradient(180deg, hsl(var(--background) / 0.85) 0%, hsl(var(--background) / 0.92) 100%)`
               }}
             />
 
