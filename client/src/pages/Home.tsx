@@ -118,18 +118,33 @@ export default function Home() {
             exit={{ y: 100, opacity: 0 }}
             className="fixed bottom-0 left-0 right-0 p-4 z-50 pointer-events-none flex justify-center"
           >
-            <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl border border-border/50 p-4 pointer-events-auto backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 flex items-center gap-4 pr-6">
+            <div 
+              className={cn(
+                "w-full max-w-2xl rounded-[2rem] shadow-2xl border border-border/20 p-4 pointer-events-auto backdrop-blur-3xl transition-colors duration-700 flex items-center gap-4 pr-6",
+                currentStation.color.replace('bg-', 'bg-').replace('-600', '-500/20').replace('-500', '-400/20').replace('-700', '-600/20'),
+                "bg-white/80 dark:bg-zinc-900/80"
+              )}
+              style={{
+                background: `linear-gradient(135deg, hsl(var(--background) / 0.8), hsl(var(--background) / 0.9)), var(--tw-gradient-to)`
+              }}
+            >
               
               {/* Spinning Album Art */}
               <div className="relative shrink-0">
                 <motion.div 
                   animate={{ rotate: isPlaying ? 360 : 0 }}
                   transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-                  className="w-16 h-16 rounded-full overflow-hidden border-2 border-border shadow-sm"
+                  className={cn(
+                    "w-16 h-16 rounded-full overflow-hidden border-2 shadow-lg transition-colors duration-700",
+                    currentStation.color.replace('bg-', 'border-')
+                  )}
                 >
                   <img src={currentStation.image} alt="Playing" className="w-full h-full object-cover" />
                 </motion.div>
-                <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1 border-2 border-background">
+                <div className={cn(
+                  "absolute -bottom-1 -right-1 rounded-full p-1 border-2 border-background transition-colors duration-700",
+                  currentStation.color
+                )}>
                   <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
                 </div>
               </div>
@@ -156,7 +171,10 @@ export default function Home() {
 
                 <button 
                   onClick={togglePlay}
-                  className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/20"
+                  className={cn(
+                    "w-14 h-14 rounded-2xl text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/10",
+                    currentStation.color
+                  )}
                 >
                   {isPlaying ? (
                     <Pause className="w-7 h-7 fill-current" />
