@@ -48,13 +48,13 @@ export default function Home() {
             >
               <Card 
                 className={cn(
-                  "overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full group rounded-2xl",
+                  "overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full group rounded-lg",
                   currentStation?.id === station.id ? "ring-2 ring-primary bg-primary/5" : "bg-card"
                 )}
                 onClick={() => playStation(station)}
               >
                 <CardContent className="p-0 flex flex-col items-center">
-                  <div className="relative w-full aspect-square max-w-[120px] mt-4 overflow-hidden rounded-xl bg-muted">
+                  <div className="relative w-full aspect-square max-w-[120px] mt-4 overflow-hidden rounded-md bg-muted">
                     <img 
                       src={station.image} 
                       alt={station.name}
