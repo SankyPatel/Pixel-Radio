@@ -2,14 +2,14 @@ import { useState } from "react";
 import { STATIONS, Station } from "@/lib/stations";
 import { useRadio } from "@/hooks/use-radio";
 import { useCast } from "@/hooks/use-cast";
-import { Play, Pause, Cast, Volume2, Radio, X, ChevronDown } from "lucide-react";
+import { Play, Pause, Cast, Volume2, Radio, X, ChevronDown, SkipBack, SkipForward } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export default function Home() {
-  const { currentStation, isPlaying, playStation, togglePlay, volume, setVolume } = useRadio();
+  const { currentStation, isPlaying, playStation, togglePlay, volume, setVolume, setOnNext, setOnPrev } = useRadio();
   const { isCastAvailable, isCasting, castDeviceName, requestCast, castStation, stopCast } = useCast();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -32,6 +32,25 @@ export default function Home() {
   const closeExpanded = () => {
     setIsExpanded(false);
   };
+
+  const playNext = () => {
+    if (!currentStation) return;
+    const idx = STATIONS.findIndex((s) => s.id === currentStation.id);
+    const next = STATIONS[(idx + 1) % STATIONS.length];
+    playStation(next);
+    if (isCasting) castStation(next);
+  };
+
+  const playPrev = () => {
+    if (!currentStation) return;
+    const idx = STATIONS.findIndex((s) => s.id === currentStation.id);
+    const prev = STATIONS[(idx - 1 + STATIONS.length) % STATIONS.length];
+    playStation(prev);
+    if (isCasting) castStation(prev);
+  };
+
+  setOnNext(playNext);
+  setOnPrev(playPrev);
 
   return (
     <div className="min-h-screen bg-background pb-32 font-sans selection:bg-primary/20">
@@ -286,25 +305,20 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Play / Cast buttons */}
-                <div className="flex items-center justify-center gap-6">
-                  {isCastAvailable && (
-                    <button
-                      onClick={handleCastClick}
-                      className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
-                        isCasting ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      )}
-                      data-testid="button-cast-expanded"
-                    >
-                      <Cast className="w-5 h-5" />
-                    </button>
-                  )}
+                {/* Prev / Play / Next buttons */}
+                <div className="flex items-center justify-center gap-5">
+                  <button
+                    onClick={playPrev}
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-muted/60 active:scale-90 transition-all"
+                    data-testid="button-prev-expanded"
+                  >
+                    <SkipBack className="w-6 h-6 fill-current" />
+                  </button>
 
                   <button
                     onClick={togglePlay}
                     className={cn(
-                      "w-18 h-18 rounded-full text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl",
+                      "rounded-full text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl",
                       currentStation.color
                     )}
                     style={{ width: 72, height: 72 }}
@@ -317,10 +331,30 @@ export default function Home() {
                     )}
                   </button>
 
-                  {isCastAvailable && (
-                    <div className="w-12 h-12" />
-                  )}
+                  <button
+                    onClick={playNext}
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-muted/60 active:scale-90 transition-all"
+                    data-testid="button-next-expanded"
+                  >
+                    <SkipForward className="w-6 h-6 fill-current" />
+                  </button>
                 </div>
+
+                {/* Cast button below */}
+                {isCastAvailable && (
+                  <div className="flex justify-center">
+                    <button
+                      onClick={handleCastClick}
+                      className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
+                        isCasting ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}
+                      data-testid="button-cast-expanded"
+                    >
+                      <Cast className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
               </motion.div>
             </div>
           </motion.div>

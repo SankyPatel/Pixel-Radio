@@ -11,6 +11,8 @@ export function useRadio() {
   const interruptedRef = useRef(false);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentStationRef = useRef<Station | null>(null);
+  const onNextRef = useRef<(() => void) | null>(null);
+  const onPrevRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     currentStationRef.current = currentStation;
@@ -200,8 +202,12 @@ export function useRadio() {
       setCurrentStation(null);
     });
 
-    navigator.mediaSession.setActionHandler('previoustrack', null);
-    navigator.mediaSession.setActionHandler('nexttrack', null);
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+      if (onPrevRef.current) onPrevRef.current();
+    });
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+      if (onNextRef.current) onNextRef.current();
+    });
   }, [reloadAndPlay]);
 
   useEffect(() => {
@@ -242,12 +248,17 @@ export function useRadio() {
     }
   };
 
+  const setOnNext = useCallback((fn: () => void) => { onNextRef.current = fn; }, []);
+  const setOnPrev = useCallback((fn: () => void) => { onPrevRef.current = fn; }, []);
+
   return {
     currentStation,
     isPlaying,
     volume,
     setVolume,
     togglePlay,
-    playStation
+    playStation,
+    setOnNext,
+    setOnPrev
   };
 }
