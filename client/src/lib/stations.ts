@@ -36,7 +36,7 @@ export const STATIONS: Station[] = [
     id: 'city-1016',
     name: 'City 1016',
     genre: 'UAE No. 1 Bollywood',
-    url: 'https://arn.itp.com/city1016',
+    url: 'https://n09.radiojar.com/gmwyu8xdrxquv',
     image: '/assets/stations/city_1016.jpg',
     color: 'bg-red-600'
   },
