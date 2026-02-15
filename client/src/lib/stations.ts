@@ -28,7 +28,7 @@ export const STATIONS: Station[] = [
     id: 'mirchi-dubai',
     name: 'Radio Mirchi Dubai',
     genre: 'Bollywood Hits',
-    url: 'https://18093.live.streamtheworld.com/NJS_HIN_ESTAAC/HLS/playlist.m3u8',
+    url: 'https://27753.live.streamtheworld.com/DUB_HIN_GSTAAC/HLS/playlist.m3u8',
     image: '/assets/stations/mirchi_dubai.png',
     color: 'bg-sky-600'
   },
