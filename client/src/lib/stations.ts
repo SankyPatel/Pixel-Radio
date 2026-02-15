@@ -12,7 +12,7 @@ export const STATIONS: Station[] = [
     id: 'mirchi-nj',
     name: 'Radio Mirchi New Jersey',
     genre: 'Bollywood & Local',
-    url: 'https://17653.live.streamtheworld.com/NJS_HIN_ESTAAC/HLS/bc2b07de-e7ef-4f35-8857-8d5c8704e12b/0/playlist.m3u8',
+    url: 'https://17653.live.streamtheworld.com/NJS_HIN_ESTAAC/HLS/playlist.m3u8',
     image: '/assets/stations/mirchi_nj.png',
     color: 'bg-blue-600'
   },
@@ -28,7 +28,7 @@ export const STATIONS: Station[] = [
     id: 'mirchi-dubai',
     name: 'Radio Mirchi Dubai',
     genre: 'Bollywood Hits',
-    url: 'https://25283.live.streamtheworld.com/DUB_HIN_GSTAAC/HLS/6f5d5d6b-660e-4365-9826-5b04bdfd01d8/0/playlist.m3u8',
+    url: 'https://18093.live.streamtheworld.com/NJS_HIN_ESTAAC/HLS/playlist.m3u8',
     image: '/assets/stations/mirchi_dubai.png',
     color: 'bg-sky-600'
   },
@@ -36,7 +36,7 @@ export const STATIONS: Station[] = [
     id: 'city-1016',
     name: 'City 1016',
     genre: 'UAE No. 1 Bollywood',
-    url: 'http://sc-bb.1.fm:8017/',
+    url: 'https://arn.itp.com/city1016',
     image: '/assets/stations/city_1016.jpg',
     color: 'bg-red-600'
   },
@@ -44,7 +44,7 @@ export const STATIONS: Station[] = [
     id: 'city-dil-se',
     name: 'City Dil Se FM',
     genre: 'Retro Bollywood',
-    url: 'http://prclive1.listenon.in:8812/',
+    url: 'https://arn.itp.com/citydilse',
     image: '/assets/stations/city_dil_se.jpg',
     color: 'bg-rose-500'
   },
@@ -52,7 +52,7 @@ export const STATIONS: Station[] = [
     id: 'big-fm-int',
     name: 'Big FM International 104.9',
     genre: 'Global Desi Hits',
-    url: 'http://prclive1.listenon.in:8824/',
+    url: 'http://sc-bb.1.fm:8017/',
     image: '/assets/stations/bigfm_int.webp',
     color: 'bg-blue-500'
   },
@@ -60,7 +60,7 @@ export const STATIONS: Station[] = [
     id: 'mirchi-983',
     name: 'Radio Mirchi 98.3 FM',
     genre: 'India Original',
-    url: 'http://radios.crabdance.com:8002/1',
+    url: 'http://14933.live.streamtheworld.com/RADIO_MIRCHI_MUM_SC',
     image: '/assets/stations/mirchi_983.webp',
     color: 'bg-orange-500'
   },
