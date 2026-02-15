@@ -1,6 +1,7 @@
 import { STATIONS, Station } from "@/lib/stations";
 import { useRadio } from "@/hooks/use-radio";
-import { Play, Pause, Cast, Volume2, Radio, Info } from "lucide-react";
+import { useCast } from "@/hooks/use-cast";
+import { Play, Pause, Cast, Volume2, Radio, CastIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +9,22 @@ import { cn } from "@/lib/utils";
 
 export default function Home() {
   const { currentStation, isPlaying, playStation, togglePlay, volume, setVolume } = useRadio();
+  const { isCastAvailable, isCasting, castDeviceName, requestCast, castStation, stopCast } = useCast();
+
+  const handleCastClick = () => {
+    if (isCasting) {
+      stopCast();
+    } else {
+      requestCast();
+    }
+  };
+
+  const handlePlayStation = (station: Station) => {
+    playStation(station);
+    if (isCasting) {
+      castStation(station);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-32 font-sans selection:bg-primary/20">
@@ -22,12 +39,37 @@ export default function Home() {
           </h1>
         </div>
         <button 
-          className="p-3 hover:bg-muted rounded-full transition-colors"
-          title="Cast to device (Mock)"
+          onClick={handleCastClick}
+          className={cn(
+            "p-3 rounded-full transition-colors relative",
+            isCasting ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground"
+          )}
+          data-testid="button-cast"
+          title={isCasting ? `Casting to ${castDeviceName}` : "Cast to device"}
         >
-          <Cast className="w-5 h-5 text-muted-foreground" />
+          <Cast className="w-5 h-5" />
+          {isCasting && (
+            <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+          )}
         </button>
       </header>
+
+      {/* Cast Banner */}
+      <AnimatePresence>
+        {isCasting && castDeviceName && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-primary/10 text-primary text-center py-2 px-4 text-sm font-medium flex items-center justify-center gap-2">
+              <Cast className="w-4 h-4" />
+              Casting to {castDeviceName}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-5xl">
@@ -51,7 +93,8 @@ export default function Home() {
                   "overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow-md transition-all duration-300 h-full group rounded-lg",
                   currentStation?.id === station.id ? "ring-2 ring-primary bg-primary/5" : "bg-card"
                 )}
-                onClick={() => playStation(station)}
+                onClick={() => handlePlayStation(station)}
+                data-testid={`card-station-${station.id}`}
               >
                 <CardContent className="p-0 flex flex-col items-center">
                   <div className="relative w-full aspect-square max-w-[120px] mt-4 overflow-hidden rounded-md bg-muted">
@@ -77,7 +120,7 @@ export default function Home() {
                   </div>
                   
                   <div className="p-3 text-center w-full">
-                    <h3 className="font-bold text-sm leading-tight truncate px-1">{station.name}</h3>
+                    <h3 className="font-bold text-sm leading-tight truncate px-1" data-testid={`text-station-name-${station.id}`}>{station.name}</h3>
                     <p className="text-[10px] text-muted-foreground font-medium truncate uppercase tracking-wider">{station.genre}</p>
                     
                     <div className="mt-2 flex justify-center h-2">
@@ -149,13 +192,15 @@ export default function Home() {
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <h4 className="font-bold truncate text-base">{currentStation.name}</h4>
-                <p className="text-sm text-muted-foreground truncate">{currentStation.genre} • Live</p>
+                <h4 className="font-bold truncate text-base" data-testid="text-now-playing">{currentStation.name}</h4>
+                <p className="text-sm text-muted-foreground truncate">
+                  {currentStation.genre} • {isCasting ? `Casting to ${castDeviceName}` : 'Live'}
+                </p>
               </div>
 
               {/* Controls */}
-              <div className="flex items-center gap-4">
-                 {/* Volume Slider (Hidden on small screens) */}
+              <div className="flex items-center gap-3">
+                {/* Volume Slider (Hidden on small screens) */}
                 <div className="hidden sm:flex items-center gap-2 w-24 mr-2">
                   <Volume2 className="w-4 h-4 text-muted-foreground" />
                   <Slider 
@@ -167,12 +212,28 @@ export default function Home() {
                   />
                 </div>
 
+                {/* Cast Button in Player */}
+                {isCastAvailable && (
+                  <button
+                    onClick={handleCastClick}
+                    className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                      isCasting ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    )}
+                    data-testid="button-cast-player"
+                    title={isCasting ? "Stop casting" : "Cast to device"}
+                  >
+                    <Cast className="w-5 h-5" />
+                  </button>
+                )}
+
                 <button 
                   onClick={togglePlay}
                   className={cn(
                     "w-14 h-14 rounded-2xl text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/10",
                     currentStation.color
                   )}
+                  data-testid="button-play-pause"
                 >
                   {isPlaying ? (
                     <Pause className="w-7 h-7 fill-current" />
