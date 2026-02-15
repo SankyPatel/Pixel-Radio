@@ -180,13 +180,16 @@ export default function Home() {
                 <button
                   onClick={closeExpanded}
                   className="p-2 rounded-full hover:bg-muted/80 transition-colors text-muted-foreground"
-                  data-testid="button-close-expanded"
+                  data-testid="button-minimize-expanded"
                 >
                   <ChevronDown className="w-6 h-6" />
                 </button>
                 <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Now Playing</span>
                 <button
-                  onClick={closeExpanded}
+                  onClick={() => {
+                    closeExpanded();
+                    togglePlay();
+                  }}
                   className="p-2 rounded-full hover:bg-muted/80 transition-colors text-muted-foreground"
                   data-testid="button-x-expanded"
                 >
