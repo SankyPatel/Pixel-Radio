@@ -13,7 +13,8 @@ export function useCast() {
   const [isCastAvailable, setIsCastAvailable] = useState(false);
   const [isCasting, setIsCasting] = useState(false);
   const [castDeviceName, setCastDeviceName] = useState<string | null>(null);
-  const sessionRef = useRef<any>(null);
+  const castContextRef = useRef<any>(null);
+  const pendingStationRef = useRef<Station | null>(null);
 
   useEffect(() => {
     window.__onGCastApiAvailable = (isAvailable: boolean) => {
@@ -33,61 +34,108 @@ export function useCast() {
   }, []);
 
   const initializeCast = () => {
-    const castContext = window.cast.framework.CastContext.getInstance();
-    castContext.setOptions({
-      receiverApplicationId: window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-      autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-    });
+    try {
+      const context = window.cast.framework.CastContext.getInstance();
+      context.setOptions({
+        receiverApplicationId: window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
+      });
 
-    castContext.addEventListener(
-      window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-      (event: any) => {
-        const session = castContext.getCurrentSession();
-        if (event.sessionState === window.cast.framework.SessionState.SESSION_STARTED ||
-            event.sessionState === window.cast.framework.SessionState.SESSION_RESUMED) {
-          setIsCasting(true);
-          sessionRef.current = session;
-          setCastDeviceName(session?.getCastDevice()?.friendlyName || 'Cast Device');
-        } else if (event.sessionState === window.cast.framework.SessionState.SESSION_ENDED) {
-          setIsCasting(false);
-          sessionRef.current = null;
-          setCastDeviceName(null);
+      castContextRef.current = context;
+
+      context.addEventListener(
+        window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+        (event: any) => {
+          switch (event.sessionState) {
+            case window.cast.framework.SessionState.SESSION_STARTED:
+            case window.cast.framework.SessionState.SESSION_RESUMED: {
+              const session = context.getCurrentSession();
+              setIsCasting(true);
+              setCastDeviceName(session?.getCastDevice()?.friendlyName || 'Cast Device');
+
+              if (pendingStationRef.current) {
+                loadMediaOnSession(session, pendingStationRef.current);
+                pendingStationRef.current = null;
+              }
+              break;
+            }
+            case window.cast.framework.SessionState.SESSION_ENDED:
+              setIsCasting(false);
+              setCastDeviceName(null);
+              break;
+          }
         }
-      }
-    );
+      );
 
-    setIsCastAvailable(true);
+      setIsCastAvailable(true);
+    } catch (err) {
+      console.error('Cast: Failed to initialize', err);
+    }
+  };
+
+  const getContentType = (url: string) => {
+    if (url.includes('.m3u8')) return 'application/x-mpegURL';
+    if (url.includes('.aac') || url.includes('ESTAAC')) return 'audio/aac';
+    return 'audio/mpeg';
+  };
+
+  const loadMediaOnSession = (session: any, station: Station) => {
+    if (!session) return;
+
+    try {
+      const contentType = getContentType(station.url);
+      const mediaInfo = new window.chrome.cast.media.MediaInfo(station.url, contentType);
+
+      mediaInfo.streamType = window.chrome.cast.media.StreamType.LIVE;
+
+      const metadata = new window.chrome.cast.media.MusicTrackMediaMetadata();
+      metadata.title = station.name;
+      metadata.artist = station.genre;
+      metadata.images = [
+        new window.chrome.cast.Image(window.location.origin + station.image)
+      ];
+      mediaInfo.metadata = metadata;
+
+      const request = new window.chrome.cast.media.LoadRequest(mediaInfo);
+      request.autoplay = true;
+
+      session.loadMedia(request).then(
+        () => console.log('Cast: Media loaded successfully'),
+        (err: any) => console.error('Cast: Error loading media', err)
+      );
+    } catch (err) {
+      console.error('Cast: Error creating media request', err);
+    }
   };
 
   const requestCast = useCallback(() => {
-    if (!window.cast) return;
-    const castContext = window.cast.framework.CastContext.getInstance();
-    castContext.requestSession();
-  }, []);
-
-  const castStation = useCallback((station: Station) => {
-    const session = sessionRef.current;
-    if (!session) return;
-
-    const mediaInfo = new window.chrome.cast.media.MediaInfo(station.url, 'audio/mpeg');
-    mediaInfo.metadata = new window.chrome.cast.media.MusicTrackMediaMetadata();
-    mediaInfo.metadata.title = station.name;
-    mediaInfo.metadata.artist = station.genre;
-    mediaInfo.metadata.images = [
-      new window.chrome.cast.Image(window.location.origin + station.image)
-    ];
-
-    const request = new window.chrome.cast.media.LoadRequest(mediaInfo);
-    session.loadMedia(request).then(
-      () => console.log('Cast: Media loaded'),
-      (err: any) => console.error('Cast: Error loading media', err)
+    if (!castContextRef.current) return;
+    castContextRef.current.requestSession().then(
+      () => console.log('Cast: Session started'),
+      (err: any) => {
+        if (err !== 'cancel') {
+          console.error('Cast: Error starting session', err);
+        }
+      }
     );
   }, []);
 
+  const castStation = useCallback((station: Station) => {
+    const context = castContextRef.current;
+    if (!context) return;
+
+    const session = context.getCurrentSession();
+    if (session) {
+      loadMediaOnSession(session, station);
+    } else {
+      pendingStationRef.current = station;
+      requestCast();
+    }
+  }, [requestCast]);
+
   const stopCast = useCallback(() => {
-    if (!window.cast) return;
-    const castContext = window.cast.framework.CastContext.getInstance();
-    castContext.endCurrentSession(true);
+    if (!castContextRef.current) return;
+    castContextRef.current.endCurrentSession(true);
   }, []);
 
   return {
