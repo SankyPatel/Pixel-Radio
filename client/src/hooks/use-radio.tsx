@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Station } from '@/lib/stations';
 import Hls from 'hls.js';
 
@@ -8,29 +8,104 @@ export function useRadio() {
   const [volume, setVolume] = useState(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const interruptedRef = useRef(false);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentStationRef = useRef<Station | null>(null);
 
-  // Initialize Audio Object
+  useEffect(() => {
+    currentStationRef.current = currentStation;
+  }, [currentStation]);
+
+  const reloadAndPlay = useCallback(async () => {
+    const audio = audioRef.current;
+    const station = currentStationRef.current;
+    if (!audio || !station) return;
+
+    try {
+      const isM3U8 = station.url.includes('.m3u8');
+
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+
+      if (isM3U8) {
+        if (Hls.isSupported()) {
+          const hls = new Hls({
+            liveSyncDurationCount: 3,
+            liveMaxLatencyDurationCount: 6,
+          });
+          hls.loadSource(station.url);
+          hls.attachMedia(audio);
+          hlsRef.current = hls;
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            audio.play().catch(() => {});
+          });
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+          audio.src = station.url;
+          audio.load();
+          await audio.play();
+        }
+      } else {
+        audio.src = station.url;
+        audio.load();
+        await audio.play();
+      }
+    } catch (err) {
+      console.error('Resume playback failed:', err);
+    }
+  }, []);
+
   useEffect(() => {
     if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.preload = 'none';
-      
-      // Handle playback ending or errors
-      audioRef.current.onended = () => setIsPlaying(false);
-      audioRef.current.onerror = (e) => {
-        console.error("Audio Error:", e);
+      const audio = new Audio();
+      audio.preload = 'none';
+      audioRef.current = audio;
+
+      audio.addEventListener('pause', () => {
+        if (currentStationRef.current && !audio.ended) {
+          interruptedRef.current = true;
+        }
+      });
+
+      audio.addEventListener('play', () => {
+        interruptedRef.current = false;
+        setIsPlaying(true);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'playing';
+        }
+      });
+
+      audio.addEventListener('ended', () => {
         setIsPlaying(false);
-      };
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
+      });
+
+      audio.addEventListener('error', (e) => {
+        console.error('Audio Error:', e);
+        if (interruptedRef.current && currentStationRef.current) {
+          if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+          resumeTimerRef.current = setTimeout(() => {
+            reloadAndPlay();
+          }, 2000);
+        } else {
+          setIsPlaying(false);
+        }
+      });
     }
 
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
+      if (resumeTimerRef.current) {
+        clearTimeout(resumeTimerRef.current);
+      }
     };
-  }, []);
+  }, [reloadAndPlay]);
 
-  // Handle Play/Pause and Source Change
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -38,9 +113,7 @@ export function useRadio() {
     if (currentStation) {
       const isM3U8 = currentStation.url.includes('.m3u8');
 
-      // Only change source if it's different to prevent reloading
-      if (audio.src !== currentStation.url) {
-        // Cleanup existing HLS
+      if (audio.src !== currentStation.url || (!hlsRef.current && isM3U8)) {
         if (hlsRef.current) {
           hlsRef.current.destroy();
           hlsRef.current = null;
@@ -48,21 +121,22 @@ export function useRadio() {
 
         if (isM3U8) {
           if (Hls.isSupported()) {
-            const hls = new Hls();
+            const hls = new Hls({
+              liveSyncDurationCount: 3,
+              liveMaxLatencyDurationCount: 6,
+            });
             hls.loadSource(currentStation.url);
             hls.attachMedia(audio);
             hlsRef.current = hls;
           } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-            // Native HLS support (Safari)
             audio.src = currentStation.url;
           }
         } else {
           audio.src = currentStation.url;
         }
-        
+
         audio.load();
-        
-        // Update Media Session Metadata
+
         if ('mediaSession' in navigator) {
           const artSrc = window.location.origin + currentStation.artworkLg;
           const artType = currentStation.artworkLg.endsWith('.jpg') ? 'image/jpeg' : 'image/png';
@@ -79,21 +153,23 @@ export function useRadio() {
         }
       }
 
-      const playAudio = async () => {
-        try {
-          if (audio.paused || audio.ended) {
-            await audio.play();
-          }
-        } catch (error) {
-          console.error("Playback failed:", error);
-          setIsPlaying(false);
-        }
-      };
-
       if (isPlaying) {
+        const playAudio = async () => {
+          try {
+            if (audio.paused || audio.ended) {
+              await audio.play();
+            }
+          } catch (error) {
+            console.error('Playback failed:', error);
+            setIsPlaying(false);
+          }
+        };
         playAudio();
       } else {
         audio.pause();
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
       }
     } else {
       audio.pause();
@@ -101,28 +177,60 @@ export function useRadio() {
     }
   }, [currentStation, isPlaying]);
 
-  // Handle Media Session Actions
   useEffect(() => {
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.setActionHandler('play', () => setIsPlaying(true));
-      navigator.mediaSession.setActionHandler('pause', () => setIsPlaying(false));
-      navigator.mediaSession.setActionHandler('stop', () => {
-        setIsPlaying(false);
-        setCurrentStation(null);
-      });
-    }
-  }, []);
+    if (!('mediaSession' in navigator)) return;
 
-  // Handle Volume
+    navigator.mediaSession.setActionHandler('play', () => {
+      interruptedRef.current = false;
+      if (currentStationRef.current) {
+        reloadAndPlay();
+        setIsPlaying(true);
+      }
+    });
+
+    navigator.mediaSession.setActionHandler('pause', () => {
+      interruptedRef.current = false;
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    });
+
+    navigator.mediaSession.setActionHandler('stop', () => {
+      interruptedRef.current = false;
+      setIsPlaying(false);
+      setCurrentStation(null);
+    });
+
+    navigator.mediaSession.setActionHandler('previoustrack', null);
+    navigator.mediaSession.setActionHandler('nexttrack', null);
+  }, [reloadAndPlay]);
+
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && interruptedRef.current && currentStationRef.current) {
+        interruptedRef.current = false;
+        reloadAndPlay();
+        setIsPlaying(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [reloadAndPlay]);
+
   const togglePlay = () => {
     if (!currentStation) return;
-    setIsPlaying(!isPlaying);
+    if (isPlaying) {
+      interruptedRef.current = false;
+      setIsPlaying(false);
+    } else {
+      reloadAndPlay();
+      setIsPlaying(true);
+    }
   };
 
   const playStation = (station: Station) => {
