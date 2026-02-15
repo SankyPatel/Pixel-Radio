@@ -76,7 +76,7 @@ export const STATIONS: Station[] = [
     id: 'red-fm-935',
     name: 'Red FM 93.5',
     genre: 'Bajaate Raho!',
-    url: 'http://radios.crabdance.com:8002/3',
+    url: 'https://stream.zeno.fm/9phrkb1e3v8uv',
     image: '/assets/stations/redfm_935.webp',
     color: 'bg-red-700'
   }
