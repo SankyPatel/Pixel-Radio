@@ -12,7 +12,7 @@ export const STATIONS: Station[] = [
     id: 'mirchi-nj',
     name: 'Radio Mirchi New Jersey',
     genre: 'Bollywood & Local',
-    url: 'http://76.164.217.100:7201/',
+    url: 'https://17653.live.streamtheworld.com/NJS_HIN_ESTAAC/HLS/bc2b07de-e7ef-4f35-8857-8d5c8704e12b/0/playlist.m3u8',
     image: '/assets/stations/mirchi_nj.png',
     color: 'bg-blue-600'
   },
@@ -20,7 +20,7 @@ export const STATIONS: Station[] = [
     id: 'zindagi-nj',
     name: 'Radio Zindagi New Jersey',
     genre: 'Desi Variety',
-    url: 'http://76.164.217.100:7481/',
+    url: 'https://us9.maindigitalstream.com/ssl/7417',
     image: '/assets/stations/zindagi.png',
     color: 'bg-green-600'
   },

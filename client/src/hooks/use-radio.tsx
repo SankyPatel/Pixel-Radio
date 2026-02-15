@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Station } from '@/lib/stations';
+import Hls from 'hls.js';
 
 export function useRadio() {
   const [currentStation, setCurrentStation] = useState<Station | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hlsRef = useRef<Hls | null>(null);
 
   // Initialize Audio Object
   useEffect(() => {
@@ -20,6 +22,12 @@ export function useRadio() {
         setIsPlaying(false);
       };
     }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+    };
   }, []);
 
   // Handle Play/Pause and Source Change
@@ -28,9 +36,30 @@ export function useRadio() {
     if (!audio) return;
 
     if (currentStation) {
+      const isM3U8 = currentStation.url.includes('.m3u8');
+
       // Only change source if it's different to prevent reloading
       if (audio.src !== currentStation.url) {
-        audio.src = currentStation.url;
+        // Cleanup existing HLS
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+          hlsRef.current = null;
+        }
+
+        if (isM3U8) {
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(currentStation.url);
+            hls.attachMedia(audio);
+            hlsRef.current = hls;
+          } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+            // Native HLS support (Safari)
+            audio.src = currentStation.url;
+          }
+        } else {
+          audio.src = currentStation.url;
+        }
+        
         audio.load();
         
         // Update Media Session Metadata
@@ -47,7 +76,6 @@ export function useRadio() {
 
       const playAudio = async () => {
         try {
-          // Reset before playing to handle potential stalls
           if (audio.paused || audio.ended) {
             await audio.play();
           }
