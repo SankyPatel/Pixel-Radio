@@ -141,7 +141,7 @@ export function useRadio() {
 
         if ('mediaSession' in navigator) {
           const artSrc = window.location.origin + currentStation.artworkLg;
-          const artType = currentStation.artworkLg.endsWith('.jpg') ? 'image/jpeg' : 'image/png';
+          const artType = currentStation.artworkLg.endsWith('.jpg') ? 'image/jpeg' : currentStation.artworkLg.endsWith('.webp') ? 'image/webp' : 'image/png';
           navigator.mediaSession.metadata = new MediaMetadata({
             title: currentStation.name,
             artist: currentStation.genre,

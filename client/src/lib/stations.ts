@@ -51,7 +51,7 @@ export const STATIONS: Station[] = [
     genre: 'Retro Bollywood',
     url: 'https://arn.itp.com/citydilse',
     image: '/assets/stations/city_dil_se.jpg',
-    artworkLg: '/assets/stations/city_dil_se_lg.png',
+    artworkLg: '/assets/stations/city_dil_se_lg.jpg',
     color: 'bg-rose-500'
   },
   {
@@ -60,7 +60,7 @@ export const STATIONS: Station[] = [
     genre: 'Global Desi Hits',
     url: 'http://sc-bb.1.fm:8017/',
     image: '/assets/stations/bigfm_int.webp',
-    artworkLg: '/assets/stations/bigfm_int_lg.png',
+    artworkLg: '/assets/stations/bigfm_int_lg.webp',
     color: 'bg-blue-500'
   },
   {
@@ -69,7 +69,7 @@ export const STATIONS: Station[] = [
     genre: 'India Original',
     url: 'https://eu8.fastcast4u.com/proxy/clyedupq?mp=%2F1?aw_0_req_lsid=2c0fae177108c9a42a7cf24878625444',
     image: '/assets/stations/mirchi_983.webp',
-    artworkLg: '/assets/stations/mirchi_983_lg.png',
+    artworkLg: '/assets/stations/mirchi_983_lg.webp',
     color: 'bg-orange-500'
   },
   {
@@ -78,7 +78,7 @@ export const STATIONS: Station[] = [
     genre: 'Dhun Badal Ke Toh Dekho',
     url: 'http://radios.crabdance.com:8002/2',
     image: '/assets/stations/bigfm_927.webp',
-    artworkLg: '/assets/stations/bigfm_927_lg.png',
+    artworkLg: '/assets/stations/bigfm_927_lg.webp',
     color: 'bg-cyan-600'
   },
   {
@@ -87,7 +87,7 @@ export const STATIONS: Station[] = [
     genre: 'Bajaate Raho!',
     url: 'https://stream.zeno.fm/9phrkb1e3v8uv',
     image: '/assets/stations/redfm_935.webp',
-    artworkLg: '/assets/stations/redfm_935_lg.png',
+    artworkLg: '/assets/stations/redfm_935_lg.webp',
     color: 'bg-red-700'
   },
   {
