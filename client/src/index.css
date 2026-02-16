@@ -106,3 +106,9 @@
   opacity: 0.3;
   transition: 0s;
 }
+
+#replit-dev-banner,
+[id^="replit-"],
+[class*="replit-"] {
+  display: none !important;
+}
