@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { STATIONS, Station } from "@/lib/stations";
 import { useRadio } from "@/hooks/use-radio";
-import { useCast } from "@/hooks/use-cast";
-import { Play, Pause, Cast, Volume2, Radio, X, ChevronDown, SkipBack, SkipForward } from "lucide-react";
+import { Play, Pause, Volume2, Radio, X, ChevronDown, SkipBack, SkipForward } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,22 +9,10 @@ import { cn } from "@/lib/utils";
 
 export default function Home() {
   const { currentStation, isPlaying, playStation, togglePlay, volume, setVolume, setOnNext, setOnPrev } = useRadio();
-  const { isCastAvailable, isCasting, castDeviceName, requestCast, castStation, stopCast } = useCast();
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleCastClick = () => {
-    if (isCasting) {
-      stopCast();
-    } else {
-      requestCast();
-    }
-  };
 
   const handlePlayStation = (station: Station) => {
     playStation(station);
-    if (isCasting) {
-      castStation(station);
-    }
     setIsExpanded(true);
   };
 
@@ -38,7 +25,6 @@ export default function Home() {
     const idx = STATIONS.findIndex((s) => s.id === currentStation.id);
     const next = STATIONS[(idx + 1) % STATIONS.length];
     playStation(next);
-    if (isCasting) castStation(next);
   };
 
   const playPrev = () => {
@@ -46,7 +32,6 @@ export default function Home() {
     const idx = STATIONS.findIndex((s) => s.id === currentStation.id);
     const prev = STATIONS[(idx - 1 + STATIONS.length) % STATIONS.length];
     playStation(prev);
-    if (isCasting) castStation(prev);
   };
 
   setOnNext(playNext);
@@ -64,38 +49,7 @@ export default function Home() {
             Pixel Radio
           </h1>
         </div>
-        <button 
-          onClick={handleCastClick}
-          className={cn(
-            "p-3 rounded-full transition-colors relative",
-            isCasting ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground"
-          )}
-          data-testid="button-cast"
-          title={isCasting ? `Casting to ${castDeviceName}` : "Cast to device"}
-        >
-          <Cast className="w-5 h-5" />
-          {isCasting && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
-          )}
-        </button>
       </header>
-
-      {/* Cast Banner */}
-      <AnimatePresence>
-        {isCasting && castDeviceName && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="bg-primary/10 text-primary text-center py-2 px-4 text-sm font-medium flex items-center justify-center gap-2">
-              <Cast className="w-4 h-4" />
-              Casting to {castDeviceName}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-5xl">
@@ -258,12 +212,6 @@ export default function Home() {
                   <p className="text-muted-foreground text-sm">
                     {currentStation.genre}
                   </p>
-                  {isCasting && castDeviceName && (
-                    <div className="flex items-center justify-center gap-1.5 text-primary text-xs font-medium">
-                      <Cast className="w-3.5 h-3.5" />
-                      <span>Casting to {castDeviceName}</span>
-                    </div>
-                  )}
                 </motion.div>
 
                 {/* Equalizer bars */}
@@ -339,22 +287,6 @@ export default function Home() {
                     <SkipForward className="w-6 h-6 fill-current" />
                   </button>
                 </div>
-
-                {/* Cast button below */}
-                {isCastAvailable && (
-                  <div className="flex justify-center">
-                    <button
-                      onClick={handleCastClick}
-                      className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
-                        isCasting ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      )}
-                      data-testid="button-cast-expanded"
-                    >
-                      <Cast className="w-5 h-5" />
-                    </button>
-                  </div>
-                )}
               </motion.div>
             </div>
           </motion.div>
@@ -411,7 +343,7 @@ export default function Home() {
               >
                 <h4 className="font-bold truncate text-base" data-testid="text-now-playing">{currentStation.name}</h4>
                 <p className="text-sm text-muted-foreground truncate">
-                  {currentStation.genre} • {isCasting ? `Casting to ${castDeviceName}` : 'Live'}
+                  {currentStation.genre} • Live
                 </p>
               </div>
 
@@ -427,20 +359,6 @@ export default function Home() {
                     className="cursor-pointer"
                   />
                 </div>
-
-                {isCastAvailable && (
-                  <button
-                    onClick={handleCastClick}
-                    className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                      isCasting ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    )}
-                    data-testid="button-cast-player"
-                    title={isCasting ? "Stop casting" : "Cast to device"}
-                  >
-                    <Cast className="w-5 h-5" />
-                  </button>
-                )}
 
                 <button 
                   onClick={togglePlay}
