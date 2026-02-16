@@ -68,8 +68,8 @@ export const STATIONS: Station[] = [
     name: 'Big FM International 104.9',
     genre: 'Global Desi Hits',
     url: 'http://sc-bb.1.fm:8017/',
-    image: '/assets/stations/bigfm_int.webp',
-    artworkLg: '/assets/stations/bigfm_int_lg.webp',
+    image: '/assets/stations/bigfm_int.png',
+    artworkLg: '/assets/stations/bigfm_int_lg.png',
     color: 'bg-blue-500'
   },
   {
