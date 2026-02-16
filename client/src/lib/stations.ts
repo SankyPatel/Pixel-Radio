@@ -85,9 +85,9 @@ export const STATIONS: Station[] = [
     id: 'big-fm-927',
     name: '92.7 Big FM',
     genre: 'Dhun Badal Ke Toh Dekho',
-    url: 'http://radios.crabdance.com:8002/2',
-    image: '/assets/stations/bigfm_927.webp',
-    artworkLg: '/assets/stations/bigfm_927_lg.webp',
+    url: 'https://stream.zeno.fm/dbstwo3dvhhtv',
+    image: '/assets/stations/bigfm_927_new.webp',
+    artworkLg: '/assets/stations/bigfm_927_lg_new.webp',
     color: 'bg-cyan-600'
   },
   {
