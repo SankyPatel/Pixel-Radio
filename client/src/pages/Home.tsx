@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { STATIONS, Station } from "@/lib/stations";
 import { useRadio } from "@/hooks/use-radio";
-import { Play, Pause, Volume2, Radio, X, ChevronDown, SkipBack, SkipForward } from "lucide-react";
+import { Play, Pause, Volume2, X, ChevronDown, SkipBack, SkipForward } from "lucide-react";
+import appLogo from "@assets/Gemini_Generated_Image_g8mjyog8mjyog8mj_1771272346550.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,8 +43,8 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40 p-6 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-xl text-primary">
-            <Radio className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm">
+            <img src={appLogo} alt="Pixel Radio" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
             Pixel Radio
