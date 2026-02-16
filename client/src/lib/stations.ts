@@ -28,6 +28,15 @@ export const STATIONS: Station[] = [
     color: 'bg-green-600'
   },
   {
+    id: 'mirchi-bayarea',
+    name: 'Radio Mirchi Bay Area',
+    genre: 'Bollywood & Bay',
+    url: 'https://17853.live.streamtheworld.com/SFO_HIN_PSTAAC/HLS/playlist.m3u8',
+    image: '/assets/stations/mirchi_bayarea.png',
+    artworkLg: '/assets/stations/mirchi_bayarea_lg.png',
+    color: 'bg-teal-600'
+  },
+  {
     id: 'mirchi-dubai',
     name: 'Radio Mirchi Dubai',
     genre: 'Bollywood Hits',
