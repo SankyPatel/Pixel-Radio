@@ -91,6 +91,15 @@ export const STATIONS: Station[] = [
     color: 'bg-red-700'
   },
   {
+    id: 'goldy-evergreen',
+    name: 'Goldy Evergreen',
+    genre: 'Network Dholera Bhai',
+    url: 'https://stream.zeno.fm/n2fd0edh9k8uv',
+    image: '/assets/stations/goldy_evergreen.jpg',
+    artworkLg: '/assets/stations/goldy_evergreen_lg.jpg',
+    color: 'bg-yellow-700'
+  },
+  {
     id: 'goldy-fresh',
     name: 'Goldy Fresh',
     genre: 'Network Dholera Bhai',
