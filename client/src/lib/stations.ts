@@ -91,6 +91,15 @@ export const STATIONS: Station[] = [
     color: 'bg-red-700'
   },
   {
+    id: 'goldy-fresh',
+    name: 'Goldy Fresh',
+    genre: 'Network Dholera Bhai',
+    url: 'https://stream.zeno.fm/5qp76a5h3p8uv',
+    image: '/assets/stations/goldy_fresh.jpg',
+    artworkLg: '/assets/stations/goldy_fresh_lg.jpg',
+    color: 'bg-green-700'
+  },
+  {
     id: 'aakashvani-guj',
     name: 'Aakashvani Gujarati',
     genre: 'All India Radio',
