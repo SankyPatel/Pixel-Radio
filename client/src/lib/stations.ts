@@ -89,5 +89,14 @@ export const STATIONS: Station[] = [
     image: '/assets/stations/redfm_935.webp',
     artworkLg: '/assets/stations/redfm_935_lg.png',
     color: 'bg-red-700'
+  },
+  {
+    id: 'aakashvani-guj',
+    name: 'Aakashvani Gujarati',
+    genre: 'All India Radio',
+    url: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio135/chunklist.m3u8',
+    image: '/assets/stations/aakashvani_guj.png',
+    artworkLg: '/assets/stations/aakashvani_guj_lg.png',
+    color: 'bg-amber-600'
   }
 ];
