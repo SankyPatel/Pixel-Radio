@@ -9,6 +9,8 @@ declare global {
   }
 }
 
+const DEFAULT_RECEIVER_APP_ID = 'CC1AD845';
+
 export function useCast() {
   const [isCastAvailable, setIsCastAvailable] = useState(false);
   const [isCasting, setIsCasting] = useState(false);
@@ -16,6 +18,7 @@ export function useCast() {
   const castInitializedRef = useRef(false);
   const pendingStationRef = useRef<Station | null>(null);
   const currentCastStationRef = useRef<Station | null>(null);
+  const retryCountRef = useRef(0);
 
   const getContentType = useCallback((url: string) => {
     if (url.includes('.m3u8')) return 'application/x-mpegURL';
@@ -65,15 +68,15 @@ export function useCast() {
     try {
       const context = window.cast.framework.CastContext.getInstance();
       context.setOptions({
-        receiverApplicationId: window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-        autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
+        receiverApplicationId: DEFAULT_RECEIVER_APP_ID,
+        autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
       });
 
       context.addEventListener(
         window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
         (event: any) => {
           const state = event.sessionState;
-          console.log('Cast: Session state changed to', state);
+          console.log('Cast: Session state =', state);
 
           if (state === window.cast.framework.SessionState.SESSION_STARTED ||
               state === window.cast.framework.SessionState.SESSION_RESUMED) {
@@ -81,26 +84,41 @@ export function useCast() {
             const deviceName = session?.getCastDevice()?.friendlyName || 'Cast Device';
             setIsCasting(true);
             setCastDeviceName(deviceName);
+            retryCountRef.current = 0;
             console.log('Cast: Connected to', deviceName);
 
             if (pendingStationRef.current) {
               setTimeout(() => {
-                loadMediaOnSession(pendingStationRef.current!);
-                pendingStationRef.current = null;
-              }, 500);
+                if (pendingStationRef.current) {
+                  loadMediaOnSession(pendingStationRef.current);
+                  pendingStationRef.current = null;
+                }
+              }, 1000);
             }
           } else if (state === window.cast.framework.SessionState.SESSION_ENDED) {
             setIsCasting(false);
             setCastDeviceName(null);
             currentCastStationRef.current = null;
             console.log('Cast: Session ended');
+          } else if (state === window.cast.framework.SessionState.SESSION_START_FAILED) {
+            console.warn('Cast: Session start failed, retry count:', retryCountRef.current);
+            if (retryCountRef.current < 2) {
+              retryCountRef.current++;
+              setTimeout(() => {
+                console.log('Cast: Retrying session...');
+                context.requestSession().catch(() => {});
+              }, 1500);
+            } else {
+              retryCountRef.current = 0;
+              pendingStationRef.current = null;
+            }
           }
         }
       );
 
       castInitializedRef.current = true;
       setIsCastAvailable(true);
-      console.log('Cast: Initialized successfully');
+      console.log('Cast: Initialized with receiver ID', DEFAULT_RECEIVER_APP_ID);
     } catch (err) {
       console.error('Cast: Initialization failed', err);
     }
@@ -131,15 +149,12 @@ export function useCast() {
       return;
     }
     try {
+      retryCountRef.current = 0;
       const context = window.cast.framework.CastContext.getInstance();
       context.requestSession().then(
-        () => console.log('Cast: Session request successful'),
+        () => console.log('Cast: Session request accepted'),
         (err: any) => {
-          if (err === 'cancel' || err?.code === 'cancel') {
-            console.log('Cast: User cancelled');
-          } else {
-            console.error('Cast: Session request failed', err);
-          }
+          console.error('Cast: Session request error:', JSON.stringify(err));
         }
       );
     } catch (err) {
