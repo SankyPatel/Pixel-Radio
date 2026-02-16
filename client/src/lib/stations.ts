@@ -95,8 +95,8 @@ export const STATIONS: Station[] = [
     name: 'Aakashvani Gujarati',
     genre: 'All India Radio',
     url: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio135/chunklist.m3u8',
-    image: '/assets/stations/aakashvani_guj.png',
-    artworkLg: '/assets/stations/aakashvani_guj_lg.png',
+    image: '/assets/stations/aakashvani_guj.jpg',
+    artworkLg: '/assets/stations/aakashvani_guj_lg.jpg',
     color: 'bg-amber-600'
   }
 ];
