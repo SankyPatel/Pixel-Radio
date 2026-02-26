@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pixel-radio-v4';
+const CACHE_NAME = 'pixel-radio-v5';
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE_URLS = [
