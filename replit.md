@@ -18,14 +18,13 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: Tailwind CSS v4 with CSS variables for theming, using a Material You / Material 3 inspired color palette with custom CSS theme tokens
 - **Animations**: Framer Motion for page transitions and UI animations
 - **Fonts**: Plus Jakarta Sans and Outfit (Google Fonts)
-- **Audio Playback**: Native HTML5 Audio API with HLS.js for `.m3u8` streams (adaptive bitrate streaming)
-- **Chromecast**: Google Cast SDK integration via custom `useCast` hook
+- **Audio Playback**: Native HTML5 Audio API with HLS.js for `.m3u8` streams (adaptive bitrate streaming). DOM-attached audio element for iOS background playback compatibility. Auto-recovery on visibility change when stream drops in background.
+- **Media Session**: Lock screen / notification center controls with station artwork, play/pause, next/previous track handlers
 - **Build Tool**: Vite with React plugin, Tailwind CSS plugin, and custom meta images plugin
 
 ### Key Frontend Files
 - `client/src/lib/stations.ts` — Static list of radio stations with stream URLs, artwork, and metadata
 - `client/src/hooks/use-radio.tsx` — Core audio playback hook managing play/pause, volume, HLS streams, and station switching
-- `client/src/hooks/use-cast.tsx` — Chromecast integration hook for remote playback
 - `client/src/pages/Home.tsx` — Main page with station grid and player controls
 
 ### Backend
